@@ -43,6 +43,12 @@ CHRONO_MINUTE_MM_PATH = BASE_DIR / "chrono_min_mm.png"
 CHRONO_HOUR_MM_PATH = BASE_DIR / "chrono_hour_mm.png"
 LIGHT_OFF_PATH = BASE_DIR / "light_off.png"
 LIGHT_ON_PATH = BASE_DIR / "light_on.png"
+CYAN_FUTURE_PATH = BASE_DIR / "future" / "needle_cyan_future_1024.png"
+YELLOW_FUTURE_PATH = BASE_DIR / "future" / "needle_yellow_future_1024.png"
+PURPLE_FUTURE_PATH = BASE_DIR / "future" / "needle_purple_future_1024.png"
+CHRONO_HOUR_FUTURE_PATH = BASE_DIR / "future" / "chrono_hour_future.png"
+CHRONO_MIN_FUTURE_PATH = BASE_DIR / "future" / "chrono_min_future.png"
+CHRONO_SEC_FUTURE_PATH = BASE_DIR / "future" / "chrono_sec_future.png"
 
 # ── Needle Source Geometry (measured from 1024x1024 PNGs) ─────────────────
 RED_HUB = (512, 835)
@@ -72,6 +78,13 @@ CHRONO_MM_MIN_HUB = (520, 534)    # B: medium, height=550px
 CHRONO_MM_MIN_TIP_DIST = 268
 CHRONO_MM_SEC_HUB = (521, 593)    # C: long double-ended, height=368px
 CHRONO_MM_SEC_TIP_DIST = 187
+# Future neon needles (1024x1024 PNGs with glow)
+CYAN_FUTURE_HUB = (507, 945)
+CYAN_FUTURE_TIP_DIST = 896
+YELLOW_FUTURE_HUB = (509, 948)
+YELLOW_FUTURE_TIP_DIST = 882
+PURPLE_FUTURE_HUB = (507, 945)    # same geometry as cyan
+PURPLE_FUTURE_TIP_DIST = 896
 
 # ── Animation ─────────────────────────────────────────────────────────────
 NEEDLE_DAMPING = 0.15
@@ -84,7 +97,7 @@ CLOCK_UPDATE_MS = 50
 # ── Dashboard Skin Configurations ─────────────────────────────────────────
 SKINS = {
     "vintage": {
-        "name": "Vintage Wood",
+        "name": "Vintage",
         "image": "dashboard_dg.png",
         "glass": "glass_overlay_transparent.png",
         "native_w": 1376,
@@ -113,7 +126,7 @@ SKINS = {
         "star_cover": (1310, 690, 1376, 752),
     },
     "modern": {
-        "name": "Modern Dark",
+        "name": "Sports",
         "image": "dashboard_mg.png",
         "glass": None,
         "native_w": 1376,
@@ -142,7 +155,7 @@ SKINS = {
         "star_cover": (1310, 690, 1376, 752),
     },
     "madmax": {
-        "name": "Mad Max",
+        "name": "Apocalypse",
         "image": "dashboard_mm.png",
         "glass": "glass_overlay_mm.png",
         "native_w": 1376,
@@ -169,6 +182,36 @@ SKINS = {
                   "chrono_hands": "mm"},
         "led": {"cx": 690, "cy": 730},
         "odometer": {"cx": 699, "cy": 605, "w": 318, "h": 50, "digits": 12},
+        "star_cover": (1310, 690, 1376, 752),
+    },
+    "future": {
+        "name": "Futuristic",
+        "image": "future/dashboard_future.png",
+        "glass": None,
+        "native_w": 1376,
+        "native_h": 752,
+        "speed": {      # Big left — Tokens/Sec (0-200)
+            "cx": 463, "cy": 358, "r": 186,
+            "start": 225, "sweep": 270,
+            "max": 200, "needle": "yellow_future",
+            "data_key": "speed",
+        },
+        "latency": {    # Big right — Latency (0-100)
+            "cx": 931, "cy": 358, "r": 186,
+            "start": 225, "sweep": 270,
+            "max": 100, "needle": "cyan_future",
+            "data_key": "latency",
+        },
+        "fuel": {       # Small right — Context Tank (F at 4:30, E at 7:30, CCW)
+            "cx": 1254, "cy": 375, "r": 85,
+            "start": -45, "sweep": -270,
+            "max": 100, "needle": "purple_future",
+            "data_key": "context_pct",
+        },
+        "clock": {"cx": 156, "cy": 375, "r": 86,
+                  "chrono_hands": "future"},
+        "led": {"cx": 690, "cy": 730},
+        "odometer": {"cx": 699, "cy": 605, "w": 318, "h": 50, "digits": 12, "style": "glow"},
         "star_cover": (1310, 690, 1376, 752),
     },
 }
@@ -296,7 +339,7 @@ def choose_skin():
     dialog.resizable(False, False)
 
     # Center on screen
-    dw, dh = 340, 260
+    dw, dh = 340, 330
     sx = (dialog.winfo_screenwidth() - dw) // 2
     sy = (dialog.winfo_screenheight() - dh) // 2
     dialog.geometry(f"{dw}x{dh}+{sx}+{sy}")
@@ -378,6 +421,9 @@ class TokenDashboard:
             "red_modern_1": RED_MODERN_1_PATH,
             "red_modern_2": RED_MODERN_2_PATH,
             "yellow_modern": YELLOW_MODERN_PATH,
+            "cyan_future": CYAN_FUTURE_PATH,
+            "yellow_future": YELLOW_FUTURE_PATH,
+            "purple_future": PURPLE_FUTURE_PATH,
         }
         for ntype, npath in needle_paths.items():
             try:
@@ -397,6 +443,9 @@ class TokenDashboard:
             "red_modern_1": (RED_MODERN_1_HUB, RED_MODERN_1_TIP_DIST),
             "red_modern_2": (RED_MODERN_2_HUB, RED_MODERN_2_TIP_DIST),
             "yellow_modern": (YELLOW_MODERN_HUB, YELLOW_MODERN_TIP_DIST),
+            "cyan_future": (CYAN_FUTURE_HUB, CYAN_FUTURE_TIP_DIST),
+            "yellow_future": (YELLOW_FUTURE_HUB, YELLOW_FUTURE_TIP_DIST),
+            "purple_future": (PURPLE_FUTURE_HUB, PURPLE_FUTURE_TIP_DIST),
         }
 
         # Load chronograph hand images — pick MM or standard based on skin
@@ -411,6 +460,17 @@ class TokenDashboard:
                 "hour": (CHRONO_MM_HOUR_HUB, CHRONO_MM_HOUR_TIP_DIST),
                 "minute": (CHRONO_MM_MIN_HUB, CHRONO_MM_MIN_TIP_DIST),
                 "second": (CHRONO_MM_SEC_HUB, CHRONO_MM_SEC_TIP_DIST),
+            }
+        elif chrono_style == "future":
+            chrono_paths = [
+                ("_chrono_second_base", CHRONO_SEC_FUTURE_PATH),   # yellow
+                ("_chrono_minute_base", CHRONO_MIN_FUTURE_PATH),   # cyan
+                ("_chrono_hour_base", CHRONO_HOUR_FUTURE_PATH),    # cyan
+            ]
+            self._chrono_geometry = {
+                "hour": (CYAN_FUTURE_HUB, CYAN_FUTURE_TIP_DIST),
+                "minute": (CYAN_FUTURE_HUB, CYAN_FUTURE_TIP_DIST),
+                "second": (YELLOW_FUTURE_HUB, YELLOW_FUTURE_TIP_DIST),
             }
         else:
             chrono_paths = [
@@ -434,13 +494,11 @@ class TokenDashboard:
         self.canvas = tk.Canvas(self.root, bg="#000000", highlightthickness=0, bd=0)
         self.canvas.pack(fill="both", expand=True)
 
-        # Initial sizing
+        # Initial sizing — start compact (~600px wide), user can resize
         self.root.update_idletasks()
-        screen_w = self.root.winfo_screenwidth() - 40
-        screen_h = self.root.winfo_screenheight() - 100
-        scale = min(screen_w / self._native_w, screen_h / self._native_h)
-        self._cur_w = int(self._native_w * scale)
-        self._cur_h = int(self._native_h * scale)
+        self._cur_w = 600
+        self._cur_h = int(600 / (self._native_w / self._native_h))
+        scale = self._cur_w / self._native_w
         self._scale = scale
         self.root.geometry(f"{self._cur_w}x{self._cur_h}")
 
@@ -794,6 +852,10 @@ class TokenDashboard:
             self._render_odometer_digital(odo_cfg)
             return
 
+        if style == "glow":
+            self._render_odometer_glow(odo_cfg)
+            return
+
         if self._drum_strip is None:
             return
 
@@ -907,6 +969,66 @@ class TokenDashboard:
         disp_w = max(1, int(win_w * self._scale))
         disp_h = max(1, int(win_h * self._scale))
         display = odo_img.resize((disp_w, disp_h), Image.LANCZOS)
+
+        self._odo_photo = ImageTk.PhotoImage(display)
+        if self._odo_canvas_id:
+            self.canvas.delete(self._odo_canvas_id)
+        self._odo_canvas_id = self.canvas.create_image(
+            self._s(odo_cfg["cx"]), self._s(odo_cfg["cy"]),
+            image=self._odo_photo, anchor="center"
+        )
+
+    def _render_odometer_glow(self, odo_cfg):
+        """Glowing digital odometer — cyan neon numerals on transparent background."""
+        self._odo_displayed = float(self._odo_target)
+        num_digits = odo_cfg.get("digits", 12)
+        val_str = str(int(self._odo_displayed)).zfill(num_digits)
+        parts = []
+        for i, ch in enumerate(val_str):
+            parts.append(ch)
+            pos_from_right = num_digits - 1 - i
+            if pos_from_right > 0 and pos_from_right % 3 == 0:
+                parts.append(",")
+        display_str = "".join(parts)
+
+        win_w = odo_cfg.get("w", 318)
+        win_h = odo_cfg.get("h", 50)
+
+        from PIL import ImageDraw, ImageFont, ImageFilter
+        # Render at 2x for glow quality then downscale
+        scale = 2
+        img = Image.new("RGBA", (win_w * scale, win_h * scale), (0, 0, 0, 255))
+        draw = ImageDraw.Draw(img)
+        font_size = int(win_h * 0.65 * scale)
+        try:
+            font = ImageFont.truetype("Menlo", font_size)
+        except Exception:
+            try:
+                font = ImageFont.truetype("Courier", font_size)
+            except Exception:
+                font = ImageFont.load_default()
+        bbox = draw.textbbox((0, 0), display_str, font=font)
+        tw = bbox[2] - bbox[0]
+        th = bbox[3] - bbox[1]
+        tx = (win_w * scale - tw) // 2
+        ty = (win_h * scale - th) // 2 - bbox[1]
+
+        # Draw glow layer (blurred cyan)
+        glow = Image.new("RGBA", (win_w * scale, win_h * scale), (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow)
+        glow_draw.text((tx, ty), display_str, fill=(0, 220, 255, 120), font=font)
+        glow = glow.filter(ImageFilter.GaussianBlur(radius=6 * scale))
+
+        # Draw sharp text on top
+        draw.text((tx, ty), display_str, fill=(180, 255, 255, 255), font=font)
+
+        # Composite glow under text
+        result = Image.alpha_composite(glow, img)
+        result = result.resize((win_w, win_h), Image.LANCZOS)
+
+        disp_w = max(1, int(win_w * self._scale))
+        disp_h = max(1, int(win_h * self._scale))
+        display = result.resize((disp_w, disp_h), Image.LANCZOS)
 
         self._odo_photo = ImageTk.PhotoImage(display)
         if self._odo_canvas_id:
